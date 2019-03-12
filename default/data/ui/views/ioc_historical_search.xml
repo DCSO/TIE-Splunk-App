@@ -1,0 +1,36 @@
+<form>
+  <label>IOC Historical Search</label>
+  <description>For searching in the Index</description>
+  <fieldset submitButton="false" autoRun="true">
+    <input type="time" token="time">
+      <label></label>
+      <default>
+        <earliest>0</earliest>
+        <latest></latest>
+      </default>
+    </input>
+    <input type="dropdown" token="type" searchWhenChanged="true">
+      <label>IOC Type</label>
+      <choice value="DomainName">Domain IOC</choice>
+      <choice value="URLVerbatim">URL IOC</choice>
+      <choice value="IPv4">IP IOC</choice>
+    </input>
+    <input type="text" token="value">
+      <label>Value</label>
+      <default>*</default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>| tstats latest(Root.value) as Value, latest(Root.categories) as Categories,latest(Root.first_seen) as "First seen",latest(Root.last_seen) as "Last seen", latest(Root.families) as Families,latest(Root.n_occurrences) as Occurrences from datamodel=DCSO_IOC  where (Root.value="*$value$*") (Root.data_type=$type$) by Root.id| rename Root.id as ID</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="count">30</option>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+</form>

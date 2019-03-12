@@ -1,0 +1,61 @@
+<setup>
+  	<block title="Configuration of DCSO App">
+    		<text>Setup page for the app</text>
+  	</block>
+
+	<block title="Specify the index with your DCSO IOCs " endpoint="admin/macros" entity="DCSO-IOC-Index">
+     		<input field="definition">
+       			<label>Specify the index</label>
+       			<type>index=dcso_app_tie-api</type>
+    		</input>
+   	</block>
+
+  	<block title="General TIE Setup">
+		<text> This is the basic setup</text>
+		<input field="token" endpoint="tiehunt/tiehuntsetupendpoint" entity="tie">
+			<font color="red"><b>*</b></font>
+      			<label>Token:</label>
+      			<type>text</type>
+    		</input>
+		<text> DCSO Pingback (runs every day at 02:00 AM) check to enable </text>
+		<input field="is_scheduled" endpoint="saved/searches" entity="Domain IOC Pingback">
+                        <label>Domain IOC Pingback</label>
+                        <type>bool</type>
+                </input>
+		<input field="is_scheduled" endpoint="saved/searches" entity="IP IOC Pingback">
+                        <label>IPv4 IOC Pingback</label>
+                        <type>bool</type>
+                </input>
+		<input field="is_scheduled" endpoint="saved/searches" entity="URL IOC Pingback">
+                        <label>URL IOC Pingback</label>
+                        <type>bool</type>
+                </input>
+
+
+	</block>
+
+<!--	<block title="Bloom Setup" endpoint="data/inputs/script" entity=".%252Fbin%252Fbfupdate.py"> 
+		<text> Uncheck to enable </text>
+		<input  field="disabled">
+			<label>bfupdate.py</label>
+			<type>bool</type>
+		</input>
+		<input  field="interval">
+                        <label>Fow often to Update (in Seconds)</label>
+                        <type>text</type>
+                </input>
+	</block>
+  	
+	<block title="PB Setup" endpoint="data/inputs/script" entity=".%252Fbin%252Fsplunk2pb.py">
+                <text> Uncheck to enable </text>
+                <input  field="disabled">
+                        <label>splunk2pb.py</label>
+                        <type>bool</type>
+                </input>
+		<input  field="interval">
+                        <label>Fow often to Update (in Seconds)</label>
+                        <type>text</type>
+                </input>
+        </block>
+-->
+</setup>

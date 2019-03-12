@@ -1,0 +1,16 @@
+<dashboard>
+  <label>IOC Detail</label>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>| tstats latest(Root.value) as Value, latest(Root.categories) as Categories, latest(Root.first_seen) as "First seen", latest(Root.last_seen) as "Last seen", latest(Root.families) as Families, latest(Root.n_occurrences) as Occurrences, latest(Root.ioc_attributes) as "IOC Attributes", latest(Root.updated_at) as "Updated at" from datamodel=DCSO_IOC  where (Root.value="*$value$*") (Root.data_type=$type$) by Root.id| rename Root.id as ID | table Value, Categories, ID, Families, "IOC Attributes","First seen", "Last seen", "Updated at"</query>
+          <earliest>-30d@d</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+</dashboard>

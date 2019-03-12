@@ -1,0 +1,103 @@
+<form>
+  <label>IOC Retrohunt</label>
+  <description>Retrohunt on CIM Datamodels (can take a while) ordered by severity and confidence.</description>
+  <fieldset submitButton="false" autoRun="true">
+    <input type="time" token="time">
+      <label>Time</label>
+      <default>
+        <earliest>-30d@d</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="min_severity" searchWhenChanged="true">
+      <label>Severity(Min)</label>
+      <default>1</default>
+      <choice value="0">0</choice>
+      <choice value="1">1</choice>
+      <choice value="2">2</choice>
+      <choice value="3">3</choice>
+      <choice value="4">4</choice>
+      <choice value="5">5</choice>
+      <prefix>min_severity&gt;=</prefix>
+    </input>
+    <input type="dropdown" token="max_severity" searchWhenChanged="true">
+      <label>Severity(Max)</label>
+      <default>5</default>
+      <choice value="0">0</choice>
+      <choice value="1">1</choice>
+      <choice value="2">2</choice>
+      <choice value="3">3</choice>
+      <choice value="4">4</choice>
+      <choice value="5">5</choice>
+      <prefix>max_severity&lt;=</prefix>
+    </input>
+    <input type="text" token="min_confidence" searchWhenChanged="true">
+      <label>Confidence(Min)</label>
+      <default>0</default>
+      <prefix>min_confidence&gt;=</prefix>
+    </input>
+    <input type="text" token="max_confidence" searchWhenChanged="true">
+      <label>Confidence(Max)</label>
+      <default>100</default>
+      <prefix>max_confidence&lt;=</prefix>
+    </input>
+    <input type="text" token="hotness" searchWhenChanged="true">
+      <label>Hotness</label>
+      <default>0</default>
+      <prefix>hotness&gt;=</prefix>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <table>
+        <title>IP Addresses  IOC found in Network Traffic Datamodel as Destination</title>
+        <search>
+          <query>| tstats count from datamodel=Network_Traffic by index,_time,All_Traffic.dest | rename All_Traffic.dest as dest | lookup DCSO-IPv4-IOC ip as dest | search weight=* | lookup DCSO-IPv4-IOC-ext ip as dest | search $min_severity$ $max_severity$ $min_confidence$ $max_confidence$ $hotness$ | rename dest as IP, count as Count, index as Index, min_severity as Severity(Min), max_severity as Severity(Max), min_confidence as Confidence(Min), max_confidence as Confidence(Max), hotness as Hotness | stats sum(Count) as Count,earliest(_time) as FirstSeen,latest(_time) as LastSeen by IP, Index, Severity(Min), Severity(Max), Confidence(Min), Confidence(Max), Hotness | eval FirstSeen=strftime(FirstSeen,"%m/%d/%Y:%H:%M:%S")  | eval LastSeen=strftime(LastSeen+86400,"%m/%d/%Y:%H:%M:%S") | sort by -Severity(Max),-Severity(Min),-Confidence(Max),-Confidence(Min)</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="count">10</option>
+        <option name="drilldown">row</option>
+        <drilldown>
+          <link target="_blank">/app/SA-DCSO-TIE/search?q=index=$row.Index$ dest_ip=$row.IP$ earliest="$row.FirstSeen$" latest="$row.LastSeen$" | lookup DCSO-IPv4-IOC-ext ip as dest_ip OUTPUTNEW hotness AS TIE-hotness,min_severity AS TIE-min_severity,max_severity AS TIE-max_severity,min_confidence AS TIE-min_confidence,max_confidence AS TIE-max_confidence,categories AS TIE-categories,actors AS TIE-actors,families AS TIE-families,ioc_attributes AS TIE-ioc_attributes,event_attributes AS TIE-event_attributes,last_seen AS TIE-last_seen</link>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Domain IOC found in Web Datamodel as Destination</title>
+        <search>
+          <query>| tstats count from datamodel=Web by index,_time,Web.dest |rename Web.dest as dest | eval dest=replace (dest, ":[1-9]{2,}","") | eval dest=replace (dest, "\*.","") | stats sum(count) by dest,index,_time | lookup DCSO-Domain-IOC domain as dest | search weight=* | lookup DCSO-Domain-IOC-ext domain as dest | search $min_severity$ $max_severity$ $min_confidence$ $max_confidence$ $hotness$ | rename dest as Domain, sum(count) as Count, index as Index, min_severity as Severity(Min), max_severity as Severity(Max), min_confidence as Confidence(Min), max_confidence as Confidence(Max), hotness as Hotness | stats sum(Count) as Count,earliest(_time) as FirstSeen,latest(_time) as LastSeen by Domain, Index, Severity(Min), Severity(Max), Confidence(Min), Confidence(Max), Hotness | eval FirstSeen=strftime(FirstSeen,"%m/%d/%Y:%H:%M:%S")  | eval LastSeen=strftime(LastSeen+86400,"%m/%d/%Y:%H:%M:%S") | sort by -Severity(Max),-Severity(Min),-Confidence(Max),-Confidence(Min)</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="count">10</option>
+        <option name="drilldown">row</option>
+	<drilldown>
+          <link target="_blank">/app/SA-DCSO-TIE/search?q=index=$row.Index$ dest="$row.Domain$" earliest="$row.FirstSeen$" latest="$row.LastSeen$" | lookup DCSO-Domain-IOC-ext domain as dest OUTPUTNEW hotness AS TIE-hotness,min_severity AS TIE-min_severity,max_severity AS TIE-max_severity,min_confidence AS TIE-min_confidence,max_confidence AS TIE-max_confidence,categories AS TIE-categories,actors AS TIE-actors,families AS TIE-families,ioc_attributes AS TIE-ioc_attributes,event_attributes AS TIE-event_attributes,last_seen AS TIE-last_seen</link>
+        </drilldown>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>URL IOC found in Web Datamodel as Url</title>
+        <search>
+          <query>| tstats count from datamodel=Web by index,_time,Web.url | rename Web.url as ModelUrl | lookup DCSO-URL-IOC url as ModelUrl | search weight=* | lookup DCSO-URL-IOC-ext url as ModelUrl | search $min_severity$ $max_severity$ $min_confidence$ $max_confidence$ $hotness$ | rename ModelUrl as URL, sum(count) as Count, index as Index, min_severity as Severity(Min), max_severity as Severity(Max), min_confidence as Confidence(Min), max_confidence as Confidence(Max), hotness as Hotness | stats sum(Count) as Count,earliest(_time) as FirstSeen,latest(_time) as LastSeen by URL, Index, Severity(Min), Severity(Max), Confidence(Min), Confidence(Max), Hotness | eval FirstSeen=strftime(FirstSeen,"%m/%d/%Y:%H:%M:%S")  | eval LastSeen=strftime(LastSeen+86400,"%m/%d/%Y:%H:%M:%S") | sort by -Severity(Max),-Severity(Min),-Confidence(Max),-Confidence(Min)</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="count">10</option>
+        <option name="drilldown">row</option>
+        <drilldown>
+          <link target="_blank">/app/SA-DCSO-TIE/search?q=index=$row.Index$ url="$row.URL$" earliest="$row.FirstSeen$" latest="$row.LastSeen$" | lookup DCSO-URL-IOC-ext url OUTPUTNEW hotness AS TIE-hotness,min_severity AS TIE-min_severity,max_severity AS TIE-max_severity,min_confidence AS TIE-min_confidence,max_confidence AS TIE-max_confidence,categories AS TIE-categories,actors AS TIE-actors,families AS TIE-families,ioc_attributes AS TIE-ioc_attributes,event_attributes AS TIE-event_attributes,last_seen AS TIE-last_seen</link>
+        </drilldown>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+</form>

@@ -1,0 +1,14 @@
+<nav>
+	<view name="ioc_dashboard" default="true" />
+	<view name="es_ioc_overview" />
+	<view name="ioc_historical_search" />
+	<view name="ioc_retrohunt" />
+	<collection label="Default">
+		<view name="search" />
+		<view name="data_models" />
+		<view name="reports" />
+		<view name="alerts" />
+		<view name="dashboards" />
+	</collection>
+	<a href="https://tie.dcso.de/">DCSO TIE Website</a>
+</nav>

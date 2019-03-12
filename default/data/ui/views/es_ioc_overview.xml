@@ -1,0 +1,89 @@
+<form>
+  <label>ES Threat List Overview</label>
+  <description>These IOC's are currently in the threat feed (IP: last 1 day, Domain: last 30 days, URL: last 180 days):</description>
+  <fieldset submitButton="false" autoRun="true">
+    <input type="text" token="ioc" searchWhenChanged="true">
+      <label>Search in IOC's</label>
+      <default>*</default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>URL IOC Overview</title>
+      <table>
+        <title>URL IOC's</title>
+        <search>
+          <query>| inputlookup DCSO-URL-IOC |rename url as URL| fields URL | search URL=*$ioc$*</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="count">10</option>
+        <option name="drilldown">cell</option>
+        <drilldown>
+          <link target="_blank">/app/SA-DCSO-TIE/ioc_detail?type=URLVerbatim&amp;value=$click.value$</link>
+        </drilldown>
+      </table>
+      <single>
+        <title>Number of found URL IOC's</title>
+        <search>
+          <query>| inputlookup DCSO-URL-IOC |rename url as URL| fields URL | search URL=*$ioc$* | stats count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <title>IPv4 IOC Overview</title>
+      <table>
+        <title>IPv4 IOC's</title>
+        <search>
+          <query>| inputlookup DCSO-IPv4-IOC |rename ip as IP| fields IP | search IP=*$ioc$*</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="count">10</option>
+        <option name="drilldown">cell</option>
+        <drilldown>
+          <link target="_blank">/app/SA-DCSO-TIE/ioc_detail?type=IPv4&amp;value=$click.value$/32</link>
+        </drilldown>
+      </table>
+      <single>
+        <title>Number of found IPv4 IOC's</title>
+        <search>
+          <query>| inputlookup DCSO-IPv4-IOC |rename ip as IP| fields IP | search IP=*$ioc$*| stats count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Domain IOC Overview</title>
+      <table>
+        <title>Domain IOC's</title>
+        <search>
+          <query>| inputlookup DCSO-Domain-IOC | rename domain as Domain| fields Domain | search Domain=*$ioc$*</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">cell</option>
+        <drilldown>
+          <link target="_blank">/app/SA-DCSO-TIE/ioc_detail?type=DomainName&amp;value=$click.value$</link>
+        </drilldown>
+      </table>
+      <single>
+        <title>Number of found Domain IOC's</title>
+        <search>
+          <query>| inputlookup DCSO-Domain-IOC | rename domain as Domain| fields Domain | search Domain=*$ioc$* | stats count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+</form>

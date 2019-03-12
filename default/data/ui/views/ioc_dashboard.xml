@@ -1,0 +1,43 @@
+<form>
+  <label>IOC Dashboard</label>
+  <fieldset submitButton="false" autoRun="true">
+    <input type="time" token="time_token" searchWhenChanged="true">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <chart>
+        <title>By IOC Type</title>
+        <search>
+          <query>|tstats latest(Root.data_type) as data_type from datamodel=DCSO_IOC.Root by Root.id | stats count by data_type</query>
+          <earliest>$time_token.earliest$</earliest>
+          <latest>$time_token.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>By IOC Category</title>
+        <search>
+          <query>| tstats latest(Root.categories) as categories from datamodel="DCSO_IOC.Root" by Root.id | stats count by categories</query>
+          <earliest>$time_token.earliest$</earliest>
+          <latest>$time_token.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.text">Category</option>
+        <option name="charting.axisTitleY.text">Number</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+</form>
