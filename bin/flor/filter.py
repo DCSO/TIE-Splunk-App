@@ -1,5 +1,5 @@
-# DCSO - Flor
 # Copyright (c) 2016, 2017, DCSO GmbH. All rights reserved.
+# DCSO - Flor
 
 import math
 from struct import unpack, pack
@@ -7,8 +7,8 @@ from .fnv import fnv_1
 
 magic_seed = b'this-is-magical'
 
-class BloomFilter(object):
 
+class BloomFilter(object):
     class CapacityError(BaseException):
         pass
 
@@ -18,8 +18,8 @@ class BloomFilter(object):
         self.N = 0
         self.data = data
         self.m = int(abs(math.ceil(float(n) * math.log(float(p)) / math.pow(math.log(2.0), 2.0))))
-        #we work in 64 bit blocks as this is the format of the Go filter.
-        self.M = int(math.ceil(float(self.m) / 64.0))*8
+        # we work in 64 bit blocks as this is the format of the Go filter.
+        self.M = int(math.ceil(float(self.m) / 64.0)) * 8
         self.k = int(math.ceil(math.log(2) * float(self.m) / float(n)))
         self.bytes = bytearray([0 for i in range(self.M)])
 
@@ -52,13 +52,13 @@ class BloomFilter(object):
             raise IOError("Invalid filter!")
         self.N = unpack('<L', bs4)[0]
 
-        self.M = int(math.ceil(self.m/64.0))*8
+        self.M = int(math.ceil(self.m / 64.0)) * 8
 
         self.bytes = bytearray(input_file.read(self.M))
         if len(self.bytes) != self.M:
-            raise IOError("Mismatched number of bytes: Expected {}, got {}.".format(self.M,len(self.bytes)))
+            raise IOError("Mismatched number of bytes: Expected {}, got {}.".format(self.M, len(self.bytes)))
 
-        #we read in any data that might be attached to the file
+        # we read in any data that might be attached to the file
         self.data = input_file.read()
 
     def write(self, output_file):
@@ -81,7 +81,7 @@ class BloomFilter(object):
                 new_value = True
             self.bytes[k] |= v
         if new_value:
-            self.N+=1
+            self.N += 1
             if self.N >= self.n:
                 raise BloomFilter.CapacityError("Bloom filter is full!")
 
@@ -97,11 +97,11 @@ class BloomFilter(object):
     def fingerprint(self, value):
         bvalue = bytes(value)
         h1 = fnv_1(bvalue)
-        h2 = fnv_1(bvalue+magic_seed)
+        h2 = fnv_1(bvalue + magic_seed)
 
         fp = []
 
         for i in range(self.k):
-            fp.append(((h1+(i+1)*h2) & 0xffffffffffffffff) % self.m)
+            fp.append(((h1 + (i + 1) * h2) & 0xffffffffffffffff) % self.m)
 
         return fp
